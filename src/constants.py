@@ -3,6 +3,7 @@ NGINX_LOAD_BALANCER_CONFIG_TEMPLATE = """events <
 >
 
 http <
+    client_max_body_size 200M;
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
 
