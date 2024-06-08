@@ -6,7 +6,8 @@ ENV LC_ALL C.UTF-8
 RUN apt-get update && apt-get install -y \
     software-properties-common \
     nginx \
-    curl
+    curl \
+    parallel
 
 RUN add-apt-repository ppa:deadsnakes/ppa && apt-get update && apt-get install -y \
     python3.6 \
@@ -23,4 +24,7 @@ ENV PYTHONPATH="$PYTHONPATH:/heroku-load-balancer/src"
 
 RUN pip3 install -r /heroku-load-balancer/requirements.txt -r /heroku-load-balancer/requirements-dev.txt
 
-CMD /bin/bash -c "python3 src/entrypoint.py create-load-balancer --nginx-port=$PORT --heroku-api-key=$HEROKU_API_KEY --pipeline-identifier=$PIPELINE_IDENTIFIER" && mv nginx.conf /etc/nginx/nginx.conf && nginx -g 'daemon off;'
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
