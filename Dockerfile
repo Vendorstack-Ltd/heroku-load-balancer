@@ -21,6 +21,8 @@ COPY . /heroku-load-balancer
 
 ENV PYTHONPATH="$PYTHONPATH:/heroku-load-balancer/src"
 
-RUN pip3 install -r /heroku-load-balancer/requirements.txt -r /heroku-load-balancer/requirements-dev.txt
+RUN pip3 install -r /heroku-load-balancer/requirements.txt -r /heroku-load-balancer/requirements-dev.txt gunicorn
 
-CMD /bin/bash -c "python3 src/entrypoint.py create-load-balancer --nginx-port=$PORT --heroku-api-key=$HEROKU_API_KEY --pipeline-identifier=$PIPELINE_IDENTIFIER" && mv nginx.conf /etc/nginx/nginx.conf && nginx -g 'daemon off;'
+EXPOSE 8000
+
+CMD /bin/bash -c "python3 src/entrypoint.py create-load-balancer --nginx-port=$PORT --heroku-api-key=$HEROKU_API_KEY --pipeline-identifier=$PIPELINE_IDENTIFIER" && mv nginx.conf /etc/nginx/nginx.conf && nginx && gunicorn -w 3 -b 0.0.0.0:$PORT src.entrypoint:create_load_balancer_app
