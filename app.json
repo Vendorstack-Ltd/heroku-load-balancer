@@ -4,12 +4,12 @@
   "repository": "https://github.com/dmytrostriletskyi/heroku-load-balancer",
   "env": {
     "HEROKU_API_KEY": {
-      "description": "Heroku API key from the personal account.",
-      "required": true
+      "description": "Deprecated / unused. The backend is now a fixed upstream in the Nginx config; kept only for backwards compatibility.",
+      "required": false
     },
     "PIPELINE_IDENTIFIER": {
-      "description": "Pipeline identifier for creating load balancer.",
-      "required": true
+      "description": "Deprecated / unused. The backend is now a fixed upstream in the Nginx config; kept only for backwards compatibility.",
+      "required": false
     }
   },
   "logo": "https://habrastorage.org/webt/w3/fp/ep/w3fpepqfjjtumhnyul4ymts-qm8.png",
