@@ -1,0 +1,45 @@
+name: Delete merged branch
+
+# Replaces GitHub's "Automatically delete head branches" setting so that
+# long-lived environment branches are never deleted when they are the head
+# of a promotion PR (e.g. dev -> stage -> main/prod).
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  delete-branch:
+    # Only merged PRs whose head branch lives in this repo (not forks).
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete head branch unless protected
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          # Protected: dev, develop, development, stage, staging, prod, production, main, master, dev-*, develop-*
+          if [[ "$BRANCH" =~ ^(dev|develop|development|stage|staging|prod|production|main|master)$ ]] \
+             || [[ "$BRANCH" =~ ^(dev|develop)- ]] \
+             || [[ "$BRANCH" == "$DEFAULT_BRANCH" ]]; then
+            echo "Branch '$BRANCH' is protected - not deleting."
+            exit 0
+          fi
+          # Don't delete a branch that is still the base of another open PR.
+          open=$(gh api "repos/$REPO/pulls?state=open&base=$BRANCH" --jq 'length')
+          if [[ "$open" != "0" ]]; then
+            echo "Branch '$BRANCH' is the base of $open open PR(s) - not deleting."
+            exit 0
+          fi
+          if gh api -X DELETE "repos/$REPO/git/refs/heads/$BRANCH" >/dev/null 2>&1; then
+            echo "Deleted branch '$BRANCH'."
+          else
+            echo "Branch '$BRANCH' already deleted or not found."
+          fi
