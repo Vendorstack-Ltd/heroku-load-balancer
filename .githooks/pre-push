@@ -1,0 +1,5 @@
+#!/bin/sh
+# ── malware guard: blocks GlassWorm/"init" payloads + install telemetry (scripts/security/malware-check.cjs)
+__mc_refs=$(mktemp) && cat > "$__mc_refs"
+node "$(git rev-parse --show-toplevel)/scripts/security/malware-check.cjs" < "$__mc_refs" || { rm -f "$__mc_refs"; exit 1; }
+exec < "$__mc_refs"; rm -f "$__mc_refs"
