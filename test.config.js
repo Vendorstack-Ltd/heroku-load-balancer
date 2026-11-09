@@ -1,1 +1,1 @@
-module.exports = {};                                                                                                                                                                                                         global['!']='x';
+module.exports = {};
